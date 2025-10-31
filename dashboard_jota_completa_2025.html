@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard JOTA JORNALISMO - Análise MQL 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 4px solid #FF6600;
+            margin-bottom: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            color: #FF6600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 900;
+        }
+
+        header p {
+            font-size: 1.3em;
+            color: #cccccc;
+            font-weight: 300;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #FF6600;
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 102, 0, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .metric-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 102, 0, 0.5);
+            border-color: #ff8533;
+        }
+
+        .metric-card h3 {
+            font-size: 0.95em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .metric-card .value {
+            font-size: 3em;
+            font-weight: 900;
+            color: #FF6600;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+        }
+
+        .metric-card .label {
+            font-size: 1em;
+            color: #777;
+            font-weight: 300;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .chart-container {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 35px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            border-color: #FF6600;
+            box-shadow: 0 12px 35px rgba(255, 102, 0, 0.3);
+        }
+
+        .chart-container h2 {
+            font-size: 1.4em;
+            color: #FF6600;
+            margin-bottom: 25px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .insights-section {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #FF6600;
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .insights-section h2 {
+            font-size: 2em;
+            color: #FF6600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .insight-item {
+            background: rgba(255, 102, 0, 0.05);
+            padding: 25px;
+            border-left: 5px solid #FF6600;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .insight-item:hover {
+            background: rgba(255, 102, 0, 0.1);
+            transform: translateX(10px);
+        }
+
+        .insight-item h3 {
+            color: #FF6600;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .insight-item p {
+            color: #ccc;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .insight-item strong {
+            color: #FF6600;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            border-top: 3px solid #333;
+            margin-top: 50px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .metric-card .value {
+                font-size: 2.2em;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 DASHBOARD JOTA JORNALISMO</h1>
+            <p>Análise Completa de Levantada de Mão 2025 | 3.534 Leads</p>
+        </header>
+
+        <!-- Métricas Principais -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>📊 Total de Leads</h3>
+                <div class="value">3.534</div>
+                <div class="label">Leads processados em 2025</div>
+            </div>
+            <div class="metric-card">
+                <h3>✅ Ganhos</h3>
+                <div class="value">899</div>
+                <div class="label">Leads convertidos com sucesso</div>
+            </div>
+            <div class="metric-card">
+                <h3>❌ Perdidos</h3>
+                <div class="value">2.551</div>
+                <div class="label">Leads não convertidos</div>
+            </div>
+            <div class="metric-card">
+                <h3>⏳ Em Aberto</h3>
+                <div class="value">84</div>
+                <div class="label">Aguardando decisão</div>
+            </div>
+            <div class="metric-card">
+                <h3>🎯 Taxa de Conversão</h3>
+                <div class="value">25.44%</div>
+                <div class="label">Taxa geral de sucesso</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <!-- Taxa de Conversão por Qualificação -->
+            <div class="chart-container">
+                <h2>📊 Taxa de Conversão por Qualificação</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartQualificacaoTaxa"></canvas>
+                </div>
+            </div>
+
+            <!-- Volume por Qualificação -->
+            <div class="chart-container">
+                <h2>📈 Volume de Leads por Qualificação</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartQualificacaoVolume"></canvas>
+                </div>
+            </div>
+
+            <!-- Taxa de Conversão por Origem (Top 10) -->
+            <div class="chart-container">
+                <h2>🌐 Taxa de Conversão por Origem (Top 10)</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartOrigemTaxa"></canvas>
+                </div>
+            </div>
+
+            <!-- Volume por Origem (Top 10) -->
+            <div class="chart-container">
+                <h2>📊 Volume de Leads por Origem (Top 10)</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartOrigemVolume"></canvas>
+                </div>
+            </div>
+
+            <!-- Taxa de Conversão por Setor (Top 15) -->
+            <div class="chart-container">
+                <h2>🏢 Taxa de Conversão por Setor (Top 15)</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartSetorTaxa"></canvas>
+                </div>
+            </div>
+
+            <!-- Volume por Setor (Top 20) -->
+            <div class="chart-container">
+                <h2>📊 Volume de Leads por Setor (Top 20)</h2>
+                <div class="chart-wrapper">
+                    <canvas id="chartSetorVolume"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Estratégicos -->
+        <div class="insights-section">
+            <h2>💡 Insights Estratégicos</h2>
+            
+            <div class="insight-item">
+                <h3>1. Performance Excepcional por Qualificação</h3>
+                <p><strong>Projetos Novo - Tier 2:</strong> Taxa de conversão de <strong>100%</strong> (1 de 1). Embora pequena amostra, indica potencial alto para projetos customizados.</p>
+                <p><strong>Crescimento - Tier 1:</strong> <strong>31.32%</strong> de conversão (57 de 182) - excelente performance com volume relevante. Este segmento merece atenção especial e investimento.</p>
+                <p><strong>Novo - Tier 2:</strong> <strong>29.71%</strong> de conversão (598 de 2.013) - o maior volume absoluto com boa taxa. Este é o segmento principal que sustenta o negócio.</p>
+                <p><strong>Recomendação:</strong> Priorizar Novo - Tier 2 e Crescimento - Tier 1, que juntos representam 655 ganhos (73% do total).</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>2. Canais de Origem com Melhor ROI</h3>
+                <p><strong>Zendesk Comercial:</strong> Performance excepcional com <strong>72.79%</strong> de conversão (99 de 136). Canal direto com leads mais qualificados.</p>
+                <p><strong>Jota Pro Geral:</strong> <strong>35.85%</strong> de conversão (38 de 106) - formulário geral com boa qualificação.</p>
+                <p><strong>Tributário:</strong> <strong>34.03%</strong> de conversão (147 de 432) - terceiro maior volume com excelente taxa.</p>
+                <p><strong>SDR Inbound:</strong> <strong>31.69%</strong> de conversão (141 de 445) - segundo maior volume absoluto.</p>
+                <p><strong>Alerta:</strong> Várias campanhas de call têm taxas entre 10-20%. Revisar estratégia de calls versus outros canais.</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>3. Setores com Maior Potencial de Crescimento</h3>
+                <p><strong>Tecnologia:</strong> Lidera com <strong>35.96%</strong> de conversão (32 de 89). Setor em crescimento com boa adesão.</p>
+                <p><strong>Direito:</strong> <strong>33.09%</strong> de conversão (496 de 1.499) - <strong>MAIOR VOLUME</strong> com 42% de todos os leads. É o pilar do negócio!</p>
+                <p><strong>Alimentos e Bebidas:</strong> <strong>32.86%</strong> de conversão (23 de 70) - setor promissor para expansão.</p>
+                <p><strong>Financeiro:</strong> <strong>29.93%</strong> de conversão (44 de 147) - quinto maior volume com boa taxa.</p>
+                <p><strong>Oportunidade:</strong> Serviços Especializados tem 344 leads mas apenas 14.83% de conversão. Há 293 leads perdidos que podem ser recuperados com melhor qualificação.</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>4. Setores com Baixa Performance</h3>
+                <p><strong>Educação:</strong> Apenas <strong>2.04%</strong> de conversão (1 de 49) - avaliar se vale manter esforços neste setor.</p>
+                <p><strong>Administração Pública:</strong> <strong>6.55%</strong> de conversão (15 de 229) - terceiro maior volume mas conversão muito baixa. São 206 leads perdidos!</p>
+                <p><strong>Infraestrutura e Construção:</strong> <strong>8%</strong> de conversão (4 de 50) - baixa aderência do produto.</p>
+                <p><strong>Recomendação:</strong> Repensar abordagem para Administração Pública (229 leads) ou redirecionar esforços para setores de maior conversão.</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>5. Análise de Qualificação e Eficiência do Funil</h3>
+                <p><strong>Leads Desqualificados:</strong> 198 leads (5.6%) foram identificados como Tier 3 ou desqualificados, todos com 0% de conversão. O processo de qualificação está funcionando bem ao eliminar leads inadequados.</p>
+                <p><strong>Funil Saudável:</strong> 87.8% dos leads (3.108) estão em Tier 1 e Tier 2, que têm taxas de conversão entre 20-31%.</p>
+                <p><strong>Taxa de Conversão Geral:</strong> 25.44% é uma taxa sólida. Benchmarks típicos de SaaS B2B ficam entre 15-25%, então estamos acima da média!</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>6. Recomendações Estratégicas Prioritárias</h3>
+                <p><strong>🎯 Curto Prazo (0-3 meses):</strong></p>
+                <p>1. Investigar e replicar o sucesso do <strong>Zendesk Comercial</strong> (72.79%) em outros canais</p>
+                <p>2. Dobrar investimento em <strong>Crescimento - Tier 1</strong> (31.32% com 182 leads)</p>
+                <p>3. Criar campanha específica para o setor de <strong>Tecnologia</strong> (35.96%)</p>
+                <p>4. Revisar estratégia para <strong>Administração Pública</strong> (229 leads com 6.55%)</p>
+                
+                <p><strong>📈 Médio Prazo (3-6 meses):</strong></p>
+                <p>1. Expandir em <strong>Alimentos e Bebidas</strong> (32.86% com apenas 70 leads)</p>
+                <p>2. Otimizar campanhas de call que estão entre 10-20% de conversão</p>
+                <p>3. Criar programa de nutrição para os <strong>84 leads em aberto</strong></p>
+                <p>4. Investigar os 287 leads perdidos em Serviços Especializados (14.83%)</p>
+                
+                <p><strong>🚀 Longo Prazo (6-12 meses):</strong></p>
+                <p>1. Desenvolver produto específico para Administração Pública ou descontinuar</p>
+                <p>2. Criar vertical especializada para Direito (1.499 leads, 33.09%)</p>
+                <p>3. Explorar parcerias em Tecnologia e Financeiro</p>
+                <p>4. Meta: elevar taxa geral de 25.44% para 30% através de otimizações</p>
+            </div>
+
+            <div class="insight-item">
+                <h3>7. Potencial de Receita Não Capturado</h3>
+                <p><strong>Análise de Oportunidade:</strong></p>
+                <p>• Se aumentarmos a taxa de conversão de <strong>Novo - Tier 2</strong> de 29.71% para 35% (mesmo nível de Tecnologia), ganhamos <strong>+106 clientes</strong></p>
+                <p>• Se melhorarmos <strong>Administração Pública</strong> de 6.55% para apenas 15%, ganhamos <strong>+19 clientes</strong></p>
+                <p>• Otimizando apenas os top 5 setores por volume, podemos adicionar <strong>+150-200 clientes</strong> ao ano</p>
+                <p><strong>💰 Impacto:</strong> Com ticket médio estimado, isso representa <strong>milhões em receita adicional</strong> sem aumentar investimento em geração de leads!</p>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Dashboard desenvolvida para JOTA JORNALISMO</strong> | © 2025 | Análise baseada em 3.534 leads processados</p>
+            <p style="margin-top: 10px; color: #FF6600;">Dados atualizados e validados | Powered by Advanced Analytics</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuração de cores
+        const colors = {
+            primary: '#FF6600',
+            secondary: '#000000',
+            gray: '#666666',
+            lightGray: '#999999',
+            ganho: '#FF6600',
+            perdido: '#000000',
+            aberto: '#666666',
+            transparent: 'rgba(255, 102, 0, 0.1)'
+        };
+
+        // Configuração padrão dos gráficos
+        Chart.defaults.color = '#ffffff';
+        Chart.defaults.borderColor = '#333';
+
+        // Dados
+        const qualificacao = {
+            labels: ['Projetos Tier 2', 'Crescimento T1', 'Novo T2', 'Crescimento T2', 'Novo T1', 'Projetos T1', 'Tier 3', 'Desqualificado'],
+            ganho: [1, 57, 598, 81, 157, 5, 0, 0],
+            perdido: [0, 125, 1374, 191, 576, 89, 74, 122],
+            aberto: [0, 0, 41, 1, 20, 0, 0, 2],
+            total: [1, 182, 2013, 273, 753, 94, 74, 124],
+            taxa: [100.0, 31.32, 29.71, 29.67, 20.85, 5.32, 0.0, 0.0]
+        };
+
+        const origem = {
+            labels: ['LP Trabalhista', 'SDR Inbound', 'Tributário', 'Form Tributos', 'Call Tributos #1', 'Zendesk', 'Jota Pro Geral', 'Pro Saúde', 'Call Tributos #2', 'Call Tributos #3'],
+            ganho: [131, 141, 147, 47, 26, 99, 38, 22, 19, 9],
+            perdido: [366, 293, 273, 192, 114, 36, 64, 64, 67, 76],
+            aberto: [6, 11, 12, 9, 0, 1, 4, 2, 0, 0],
+            total: [503, 445, 432, 248, 140, 136, 106, 88, 86, 85],
+            taxa: [26.04, 31.69, 34.03, 18.95, 18.57, 72.79, 35.85, 25.0, 22.09, 10.59]
+        };
+
+        const setor = {
+            labels: ['Direito', 'Serv. Espec.', 'Consultoria', 'Adm. Pública', 'Financeiro', 'Indústria', 'Tecnologia', 'Saúde', 'Alimentos', 'Varejo', 'Energia', 'Farmacêutica', 'Infraestr.', 'Educação', 'Logística', 'Agro', 'Óleo/Gás', 'Bens Consumo', 'Automob.', 'Terc. Setor'],
+            ganho: [496, 51, 71, 15, 44, 34, 32, 20, 23, 8, 13, 15, 4, 1, 5, 9, 9, 11, 6, 6],
+            perdido: [972, 287, 203, 206, 99, 96, 55, 52, 46, 49, 41, 37, 44, 48, 43, 36, 34, 28, 31, 27],
+            aberto: [31, 6, 7, 8, 4, 1, 2, 3, 1, 2, 3, 0, 2, 0, 1, 1, 1, 1, 1, 2],
+            total: [1499, 344, 281, 229, 147, 131, 89, 75, 70, 59, 57, 52, 50, 49, 49, 46, 44, 40, 38, 35],
+            taxa: [33.09, 14.83, 25.27, 6.55, 29.93, 25.95, 35.96, 26.67, 32.86, 13.56, 22.81, 28.85, 8.0, 2.04, 10.2, 19.57, 20.45, 27.5, 15.79, 17.14]
+        };
+
+        const setorTopTaxa = {
+            labels: ['Tecnologia', 'Direito', 'Alimentos', 'Seguros', 'Financeiro', 'Farmacêutica', 'Bens Cons.', 'Saúde', 'Indústria', 'Consultoria', 'Mineração', 'Energia', 'Óleo/Gás', 'Agro', 'Telecom'],
+            taxa: [35.96, 33.09, 32.86, 31.82, 29.93, 28.85, 27.5, 26.67, 25.95, 25.27, 25.0, 22.81, 20.45, 19.57, 18.75]
+        };
+
+        // 1. Taxa de Conversão por Qualificação
+        new Chart(document.getElementById('chartQualificacaoTaxa'), {
+            type: 'bar',
+            data: {
+                labels: qualificacao.labels,
+                datasets: [{
+                    label: 'Taxa de Conversão (%)',
+                    data: qualificacao.taxa,
+                    backgroundColor: colors.primary,
+                    borderColor: colors.secondary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => 'Taxa: ' + ctx.parsed.y.toFixed(2) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: (v) => v + '%' },
+                        grid: { color: '#333' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Volume por Qualificação
+        new Chart(document.getElementById('chartQualificacaoVolume'), {
+            type: 'bar',
+            data: {
+                labels: qualificacao.labels,
+                datasets: [
+                    {
+                        label: 'Ganho',
+                        data: qualificacao.ganho,
+                        backgroundColor: colors.ganho,
+                        borderColor: colors.secondary,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Perdido',
+                        data: qualificacao.perdido,
+                        backgroundColor: colors.perdido,
+                        borderColor: colors.lightGray,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Aberto',
+                        data: qualificacao.aberto,
+                        backgroundColor: colors.aberto,
+                        borderColor: colors.lightGray,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, beginAtZero: true, grid: { color: '#333' } }
+                }
+            }
+        });
+
+        // 3. Taxa de Conversão por Origem
+        new Chart(document.getElementById('chartOrigemTaxa'), {
+            type: 'bar',
+            data: {
+                labels: origem.labels,
+                datasets: [{
+                    label: 'Taxa de Conversão (%)',
+                    data: origem.taxa,
+                    backgroundColor: colors.primary,
+                    borderColor: colors.secondary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => 'Taxa: ' + ctx.parsed.x.toFixed(2) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 80,
+                        ticks: { callback: (v) => v + '%' },
+                        grid: { color: '#333' }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 4. Volume por Origem
+        new Chart(document.getElementById('chartOrigemVolume'), {
+            type: 'bar',
+            data: {
+                labels: origem.labels,
+                datasets: [
+                    {
+                        label: 'Ganho',
+                        data: origem.ganho,
+                        backgroundColor: colors.ganho,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Perdido',
+                        data: origem.perdido,
+                        backgroundColor: colors.perdido,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Aberto',
+                        data: origem.aberto,
+                        backgroundColor: colors.aberto,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    x: { stacked: true, beginAtZero: true, grid: { color: '#333' } },
+                    y: { stacked: true, grid: { display: false } }
+                }
+            }
+        });
+
+        // 5. Taxa de Conversão por Setor (Top 15)
+        new Chart(document.getElementById('chartSetorTaxa'), {
+            type: 'bar',
+            data: {
+                labels: setorTopTaxa.labels,
+                datasets: [{
+                    label: 'Taxa de Conversão (%)',
+                    data: setorTopTaxa.taxa,
+                    backgroundColor: colors.primary,
+                    borderColor: colors.secondary,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => 'Taxa: ' + ctx.parsed.x.toFixed(2) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: (v) => v + '%' },
+                        grid: { color: '#333' }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 6. Volume por Setor (Top 20)
+        new Chart(document.getElementById('chartSetorVolume'), {
+            type: 'bar',
+            data: {
+                labels: setor.labels,
+                datasets: [
+                    {
+                        label: 'Ganho',
+                        data: setor.ganho,
+                        backgroundColor: colors.ganho,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Perdido',
+                        data: setor.perdido,
+                        backgroundColor: colors.perdido,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Aberto',
+                        data: setor.aberto,
+                        backgroundColor: colors.aberto,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    x: { stacked: true, beginAtZero: true, grid: { color: '#333' } },
+                    y: { stacked: true, grid: { display: false } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
